@@ -1,3 +1,4 @@
+import unittest.mock
 import pytest 
 import sys 
 from unittest.mock import patch, MagicMock 
@@ -58,4 +59,39 @@ class Test_Product(unittest.TestCase):
     self.mock_db_cursor.execute.assert_has_calls([select_call, update_call], any_order=True)
 
     # Assert commit were called
+    self.mock_db.commit.assert_called()
+
+  def test_update_product_stock(self):
+    # Call method want to test
+    self.product.update_product_stock(1, 20)
+
+    # Assert that Select query run correctly 
+    select_call = unittest.mock.call(
+      'Select stock FROM products WHERE product_id=%s',
+      (1,)
+    )
+
+    # Assert that Update query run correctly 
+    update_call = unittest.mock.call(
+      'UPDATE products SET stock=%s WHERE product_id=%s',
+      (20, 1)
+    )
+
+    # Assert both call (update and select) were made 
+    self.mock_db_cursor.execute.assert_has_calls([select_call, update_call], any_order=True)
+
+    # Assert commit were called
+    self.mock_db.commit.assert_called()
+
+  def test_remove_product(self):
+    # Call method want to test 
+    self.product.remove_product(1)
+
+    # Assert that Delete query run correctly 
+    self.mock_db_cursor.execute.assert_called_with(
+      'DELETE FROM products WHERE product_id=%s',
+      (1,)
+    )
+    
+    # Assert commit made 
     self.mock_db.commit.assert_called()
